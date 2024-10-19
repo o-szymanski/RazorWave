@@ -1,0 +1,43 @@
+﻿@page "/"
+@using Microsoft.AspNetCore.SignalR.Client
+
+@inject NavigationManager NavigationManager
+
+@rendermode InteractiveWebAssembly
+
+<h3>Chat</h3>
+
+@if (IsConnected)
+{
+    <input type="text" @bind="messageInput" />
+    <button @onclick="Send">Send</button>
+
+    <ul id="messagesList">
+        @foreach (var message in Messages)
+        {
+            <li>@message</li>
+        }
+    </ul>
+}
+
+@code {
+    private HubConnection hubConnection = default!;
+    private List<string> Messages = new List<string>();
+    private string messageInput = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        hubConnection = new HubConnectionBuilder().WithUrl(NavigationManager.ToAbsoluteUri("/razorwavehub")).Build();
+        hubConnection.On<string>("ReceiveMessage", (message) =>
+        {
+            Messages.Add(message);
+            this.InvokeAsync(() => this.StateHasChanged());
+        });
+
+        await hubConnection.StartAsync();
+    }
+
+    Task Send() => hubConnection.SendAsync("SendMessage", messageInput);
+
+    public bool IsConnected => hubConnection.State == HubConnectionState.Connected;
+}
