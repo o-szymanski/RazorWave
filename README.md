@@ -8,7 +8,7 @@ RazorWave is a sample web application built with Blazor, showcasing the power an
 
 ## Technology Stack
 
-C# / .NET / Blazor
+C# / .NET / Blazor / SignalR
 
 ## Authors
 
